@@ -9,36 +9,29 @@
     </style>
 </head>
 <body>
-	<canvas id="myCanvas" width="500" height="350"></canvas>
+	<canvas id="myCanvas" width="500" height="350" style="border: 1px solid red;"></canvas>
 
 	<script>
 		//Get canvas element off of dom
 		var canvas = document.getElementById("myCanvas");
-	
 		//paintbrush initialization (ctx convention)
 		var ctx = canvas.getContext("2d");
-
 		//initializing coordinates before gameplay
 		var startX = canvas.width/2;
 		var startY = canvas.height-30;
-
 		//var for x and y coordinates
 		var x = startX;
 		var y = startY;
 		//change in x & y for change in frames while in gameplay
 		var dx = 2;
 		var dy = -2; 
-
-		//2d radius of the ball
-		var ballRadius = 5;
-
-		//angle variable
-		var angle *= Math.PI/180;
-
 		//event triggers 
 		var rightPressed = false;
 		var leftPressed = false;
 		var shotFired = false;
+		//variables for gameplay and shapes 
+		var ballRadius = 5;
+
 
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
@@ -65,20 +58,29 @@
 		
 		//startVector allows the user to see trajectory of the ball
 		function startVector(){
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			//save the prior context
+			ctx.save();
+			
 			ctx.beginPath();
-			ctx.moveTo(canvas.width/2, canvas.height);
-			ctx.lineTo(canvas.width/2, canvas.height-50);
+			
+			//[0,0] is now at [250,350], lower center of canvas
+			ctx.translate(250,350);
+			//ctx.rotate(-60*Math.PI/180);
+			ctx.moveTo(0,0);
+			ctx.lineTo(0,-30);
 			ctx.stroke();
-			ctx.closePath();
 			
-			
+			//bring back the normalized context plane.
+			ctx.restore();
 		}
 		startVector();
-		
-		//rotate the line. 
-		function rotateStartVector(){
-			ctx.save();
-		}
+
+		/*** *******
+		TODO!
+		ROTATE 
+		LINE NOW! ON EVENT!
+		****/
 
 		function drawBall(){
 			ctx.beginPath();
