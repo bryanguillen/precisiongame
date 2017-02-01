@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+    <title>Precision Video Game</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+	<canvas id="myCanvas" width="500" height="350"></canvas>
+
+	<script>
+		//Get canvas element off of dom
+		var canvas = document.getElementById("myCanvas");
+	
+		//paintbrush initialization (ctx convention)
+		var ctx = canvas.getContext("2d");
+
+		//initializing coordinates before gameplay
+		var startX = canvas.width/2;
+		var startY = canvas.height-30;
+
+		//var for x and y coordinates
+		var x = startX;
+		var y = startY;
+		//change in x & y for change in frames while in gameplay
+		var dx = 2;
+		var dy = -2; 
+
+		//2d radius of the ball
+		var ballRadius = 5;
+
+		//angle variable
+		var angle *= Math.PI/180;
+
+		//event triggers 
+		var rightPressed = false;
+		var leftPressed = false;
+		var shotFired = false;
+
+		document.addEventListener("keydown", keydownHandler, false);
+		document.addEventListener("keyup", keyupHandler, false);
+
+		function keydownHandler(e){
+			if(e.keyCode == 39){
+				rightPressed = true;
+			}else if(e.keyCode == 37){
+				leftPressed = true;
+			}else if(e.keyCode == 32){
+				shotFired = true;
+			}
+		}
+
+		function keyupHandler(e){
+			if(e.keyCode == 39){
+				rightPressed = false;
+			}else if(e.keyCode == 37){
+				leftPressed = false;
+			}else if(e.keyCode == 32){
+				shotFired = false;
+			}
+		}
+		
+		//startVector allows the user to see trajectory of the ball
+		function startVector(){
+			ctx.beginPath();
+			ctx.moveTo(canvas.width/2, canvas.height);
+			ctx.lineTo(canvas.width/2, canvas.height-50);
+			ctx.stroke();
+			ctx.closePath();
+			
+			
+		}
+		startVector();
+		
+		//rotate the line. 
+		function rotateStartVector(){
+			ctx.save();
+		}
+
+		function drawBall(){
+			ctx.beginPath();
+			ctx.arc(startX, y, ballRadius, 0, Math.PI*2, false);
+			ctx.fillStyle = "black";
+			ctx.fill();
+			ctx.closePath();
+		}
+
+		function ballInMotion(){
+			//for not leaving a trail behind after every frame
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			drawBall();
+			if(x + dx > canvas.width-ballRadius || x + dx < ballRadius){
+				dx = -dx;
+			}
+			if(y + dy < ballRadius){
+				dy = -dy;
+			} else if(y + dy > canvas.height+ballRadius){
+				document.location.reload();
+			}
+			
+			x += dx;
+			y += dy;
+		}
+
+		//setShotAngle for the trajectory of ball through gameplay
+		function setShotAngle(){
+			ctx.clearRect(0,0, canvas.width, canvas.height);
+			startVector();
+			if(rightPressed && startY < canvas.height){
+				startY += 5; 
+			}
+			else if(leftPressed && startY < canvas.height){
+				startY -= 5;
+			}
+			if(shotFired){
+				//TODO SETUP THIS BALL IN MOTION AFTER SHOTFIRED!!
+				//startX is saved as a variable!
+				setInterval(ballInMotion, 10);		
+			}
+		}
+		
+		//setInterval(ballInMotion, 10);
+		//setInterval(setShotAngle, 10);
+
+	</script>
+</body>
+</html>
