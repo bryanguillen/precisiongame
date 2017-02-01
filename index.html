@@ -10,18 +10,20 @@
 </head>
 <body>
 	<canvas id="myCanvas" width="500" height="350" style="border: 1px solid red;"></canvas>
-
 	<script>
 		//Get canvas element off of dom
 		var canvas = document.getElementById("myCanvas");
 		//paintbrush initialization (ctx convention)
 		var ctx = canvas.getContext("2d");
+		//halves
+		var width = canvas.width;
+		var height = canvas.height;
 		//initializing coordinates before gameplay
-		var startX = canvas.width/2;
-		var startY = canvas.height-30;
-		//var for x and y coordinates
-		var x = startX;
-		var y = startY;
+		var startX = width/2;
+		var startY = height/2;
+		//var for y coordinates after shot fired and on.
+		var x = 250;
+		var y = height-5;
 		//change in x & y for change in frames while in gameplay
 		var dx = 2;
 		var dy = -2; 
@@ -31,7 +33,9 @@
 		var shotFired = false;
 		//variables for gameplay and shapes 
 		var ballRadius = 5;
-
+		var gunAngle = 0;
+		//saving the gunangles 
+		var angleArray = [];
 
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
@@ -56,9 +60,9 @@
 			}
 		}
 		
-		//startVector allows the user to see trajectory of the ball
-		function startVector(){
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
+		//startVector allows the user to see trajectory before shot
+		function startVector(angle){
+			ctx.clearRect(0, 0, width, height);
 			//save the prior context
 			ctx.save();
 			
@@ -66,7 +70,7 @@
 			
 			//[0,0] is now at [250,350], lower center of canvas
 			ctx.translate(250,350);
-			//ctx.rotate(-60*Math.PI/180);
+			ctx.rotate(gunAngle*Math.PI/180);
 			ctx.moveTo(0,0);
 			ctx.lineTo(0,-30);
 			ctx.stroke();
@@ -74,17 +78,34 @@
 			//bring back the normalized context plane.
 			ctx.restore();
 		}
-		startVector();
 
-		/*** *******
-		TODO!
-		ROTATE 
-		LINE NOW! ON EVENT!
-		****/
+		//setShotAngle for the trajectory of ball through gameplay
+		function setShotAngle(){
+			ctx.clearRect(0,0, width, height);
+			startVector(gunAngle);
+			if(rightPressed && gunAngle < 90){
+				gunAngle += 2;
+			}
+			if(leftPressed && gunAngle > -90){
+				gunAngle -= 2;
+			}
+			if(shotFired){
+				//stop the loop to collect the angle
+				clearInterval(angleLoop);
+				//add angle for later reference
+				angleArray.push(gunAngle);
+			}
+		}		
 
+		/*** NOW!
+		What you have to do is, take the gunAngle, and then 
+		with that, somehow affect the trajectory of the ball. 
+		Whether it is with the drawBall function or the ballInMotion 
+		function
+		***/
 		function drawBall(){
 			ctx.beginPath();
-			ctx.arc(startX, y, ballRadius, 0, Math.PI*2, false);
+			ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
 			ctx.fillStyle = "black";
 			ctx.fill();
 			ctx.closePath();
@@ -92,41 +113,21 @@
 
 		function ballInMotion(){
 			//for not leaving a trail behind after every frame
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.clearRect(0, 0, width, height);
 			drawBall();
-			if(x + dx > canvas.width-ballRadius || x + dx < ballRadius){
+			x -= dx
+			y += dy;
+			if(x + dx > width-ballRadius || x + dx < ballRadius){
 				dx = -dx;
 			}
 			if(y + dy < ballRadius){
 				dy = -dy;
-			} else if(y + dy > canvas.height+ballRadius){
+			} else if(y + dy > height+ballRadius){
 				document.location.reload();
-			}
-			
-			x += dx;
-			y += dy;
-		}
-
-		//setShotAngle for the trajectory of ball through gameplay
-		function setShotAngle(){
-			ctx.clearRect(0,0, canvas.width, canvas.height);
-			startVector();
-			if(rightPressed && startY < canvas.height){
-				startY += 5; 
-			}
-			else if(leftPressed && startY < canvas.height){
-				startY -= 5;
-			}
-			if(shotFired){
-				//TODO SETUP THIS BALL IN MOTION AFTER SHOTFIRED!!
-				//startX is saved as a variable!
-				setInterval(ballInMotion, 10);		
 			}
 		}
 		
-		//setInterval(ballInMotion, 10);
-		//setInterval(setShotAngle, 10);
-
+		var angleLoop= setInterval(setShotAngle, 10);
 	</script>
 </body>
 </html>
