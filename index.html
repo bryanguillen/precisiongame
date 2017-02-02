@@ -27,8 +27,6 @@
 		var gunAngle = 0; 
 		var slopeObject = {};
 		var angleObject = {};
-		//var shotBall;
-		//var gamePlay;
 
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
@@ -64,11 +62,7 @@
 		}
 		
 		//generic functions for accomplishing certain tasks
-		/*rise gives the rise for the rise/run which is equal to slope
-		automatically, the run is going to be one for the ratio.Next 
-		this shoud be the y/x that will give the line! However, take
-		note this floors to the nearest whole number, so it will not 
-		be optimal at first.*/
+		
 		function isPositive(arg){
 			if(arg > 0){
 				return true;
@@ -86,6 +80,11 @@
 			return thirdAngle;
 		}
 
+		/*slope - gives the rise for the rise/run which is equal to slope
+		automatically, the run is going to be one for the ratio.Next 
+		this shoud be the y/x that will give the line! However, take
+		note this floors to the nearest whole number, so it will not 
+		be optimal at first.*/
 		function slope(theta){
 			theta = Math.abs(theta);
 			
@@ -99,7 +98,7 @@
 			//rise/run 
 			/*since the ball will always start going decreasing in y 
 			due to the starting position, we always have to make sure 
-			that the y (slope) is always negative.*/
+			that the y (slope) is negative.*/
 			var slope = heightY/widthX;
 			if(isPositive(slope)){
 				slope = -1*slope;
@@ -123,7 +122,8 @@
 			slopeObject["slopeY"] = shotSlope;
 			shotBall = setInterval(drawBallInMotion, 10);
 		}
-		//startVector allows the user to see trajectory before shot
+		
+		//startVector allows the user to aim
 		function startVector(angle){
 			ctx.clearRect(0, 0, width, height);
 			//save the prior context
@@ -151,7 +151,6 @@
 			ctx.closePath();
 		}
 
-		//clean up code && find out how to an infite amount of shots
 		function drawBallInMotion(){
 			ctx.clearRect(0, 0, width, height);	
 			dx = slopeObject["slopeX"];
