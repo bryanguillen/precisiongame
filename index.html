@@ -22,11 +22,11 @@
 		var startX = width/2;
 		var startY = height/2;
 		//var for y coordinates after shot fired and on.
-		var x = 250;
+		var x = width/2;
 		var y = height-5;
 		//change in x & y for change in frames while in gameplay
-		var dx = 2;
-		var dy = -2; 
+		var dx;
+		var dy; 
 		//event triggers 
 		var rightPressed = false;
 		var leftPressed = false;
@@ -60,6 +60,18 @@
 			}
 		}
 		
+		//generic functions for accomplishing certain tasks
+		/*rise gives the rise for the rise/run which is equal to slope
+		automatically, the run is going to be one for the ratio.Next 
+		this shoud be the y/x that will give the line! However, take
+		note this floors to the nearest whole number, so it will not 
+		be optimal at first.*/
+		function rise(theta){
+			var degree = angleArray[-1];
+			var radian = degree*Math.PI/180;
+			return Math.floor(Math.tan(radian));
+		}
+
 		//startVector allows the user to see trajectory before shot
 		function startVector(angle){
 			ctx.clearRect(0, 0, width, height);
@@ -93,16 +105,14 @@
 				//stop the loop to collect the angle
 				clearInterval(angleLoop);
 				//add angle for later reference
+				/* figure out what do with angle now
+				and how this number might relate the trajectory of a 
+				ball!*/
 				angleArray.push(gunAngle);
+				setInterval(ballInMotion, 10);
 			}
 		}		
 
-		/*** NOW!
-		What you have to do is, take the gunAngle, and then 
-		with that, somehow affect the trajectory of the ball. 
-		Whether it is with the drawBall function or the ballInMotion 
-		function
-		***/
 		function drawBall(){
 			ctx.beginPath();
 			ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
@@ -115,7 +125,7 @@
 			//for not leaving a trail behind after every frame
 			ctx.clearRect(0, 0, width, height);
 			drawBall();
-			x -= dx
+			x += dx
 			y += dy;
 			if(x + dx > width-ballRadius || x + dx < ballRadius){
 				dx = -dx;
@@ -127,7 +137,7 @@
 			}
 		}
 		
-		var angleLoop= setInterval(setShotAngle, 10);
+		var angleLoop=setInterval(setShotAngle, 10);
 	</script>
 </body>
 </html>
