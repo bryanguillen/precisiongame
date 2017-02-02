@@ -107,6 +107,22 @@
 			return slope;
 		}
 
+		function resetGameplay(){
+			gunAngle = 0;
+			x = width/2; 
+			y = height-15;
+			gamePlay = setInterval(draw, 10);
+		}
+
+		//keep an eye on this and gameplay above.. 
+		//shootGun was under shot fired in draw
+		function shootGun(rightAngle, gunAngle, xSlope){
+			gunAngle = rightAngle - gunAngle;
+			slopeObject["slopeX"] = xSlope;
+			shotSlope = slope(gunAngle);
+			slopeObject["slopeY"] = shotSlope;
+			shotBall = setInterval(drawBallInMotion, 10);
+		}
 		//startVector allows the user to see trajectory before shot
 		function startVector(angle){
 			ctx.clearRect(0, 0, width, height);
@@ -138,24 +154,24 @@
 		//clean up code && find out how to an infite amount of shots
 		function drawBallInMotion(){
 			ctx.clearRect(0, 0, width, height);	
+			dx = slopeObject["slopeX"];
+			dy = slopeObject["slopeY"];
 			drawBall();
-			x += slopeObject["slopeX"];
-			y += slopeObject["slopeY"];			
+			x += dx;
+			y += dy;			
 
-			if(x + slopeObject["slopeX"] > width-ballRadius || x + slopeObject["slopeX"] < ballRadius){
+			//dx = -dx bug
+			if(x + dx > width-ballRadius || x + dx < ballRadius){
 				slopeObject["slopeX"] = -slopeObject["slopeX"];
 			}
 
-			if(y + slopeObject["slopeY"] < ballRadius){
+			if(y + dy < ballRadius){
 				slopeObject["slopeY"] = -slopeObject["slopeY"];
-			} else if(y + slopeObject["slopeY"] > height+ballRadius){
-				//TODO BREAK LOOP AND RE ENTER THE LOOP OF GAME PLAY
+			} 
+			else if(y + dy > height+ballRadius){
 				clearInterval(shotBall);
-				//shotSlope = 0;
-				gunAngle = 0;
-				x = width/2; 
-				y = height-15;
-				gamePlay = setInterval(draw, 10);
+				/*reset method*/
+				resetGameplay();
 			}			
 		}
 
@@ -183,18 +199,10 @@
 				}
 				//put the following steps in a function when possible
 				else if(isPositive(gunAngle)){
-					gunAngle = 90 - gunAngle;
-					slopeObject["slopeX"] = 1;
-					shotSlope = slope(gunAngle);
-					slopeObject["slopeY"] = shotSlope;
-					shotBall = setInterval(drawBallInMotion, 10);
+					shootGun(90, gunAngle, 1);
 				}
 				else{
-					gunAngle = -90 - gunAngle;
-					slopeObject["slopeX"] = -1;
-					shotSlope = slope(gunAngle);
-					slopeObject["slopeY"] = shotSlope;
-					shotBall = setInterval(drawBallInMotion, 10);
+					shootGun(-90, gunAngle, -1);
 				}
 			}
 		}
