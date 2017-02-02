@@ -11,31 +11,22 @@
 <body>
 	<canvas id="myCanvas" width="500" height="350" style="border: 1px solid red;"></canvas>
 	<script>
-		//Get canvas element off of dom
 		var canvas = document.getElementById("myCanvas");
-		//paintbrush initialization (ctx convention)
 		var ctx = canvas.getContext("2d");
-		//halves
 		var width = canvas.width;
 		var height = canvas.height;
-		//initializing coordinates before gameplay
 		var startX = width/2;
 		var startY = height/2;
-		//var for y coordinates after shot fired and on.
 		var x = width/2;
-		var y = height-5;
-		//change in x & y for change in frames while in gameplay
+		var y = height-15;
 		var dx = 1;
-		var dy = -2; 
-		//event triggers 
+		var dy;  
 		var rightPressed = false;
 		var leftPressed = false;
-		var shotFired = false;
-		//variables for gameplay and shapes 
+		var shotFired = false; 
 		var ballRadius = 5;
-		var gunAngle = 0;
-		//saving the gunAngles 
-		var deltaYArray = [];
+		var gunAngle = 0; 
+		var slopeArray = [];
 		var angleArray = [];
 
 		document.addEventListener("keydown", keydownHandler, false);
@@ -67,10 +58,29 @@
 		this shoud be the y/x that will give the line! However, take
 		note this floors to the nearest whole number, so it will not 
 		be optimal at first.*/
-		function deltaY(theta){
-			var radianAngle = theta*Math.PI/180;
-			var deltaY = Math.floor(Math.tan(radianAngle));
-			return deltaY;
+		function isPositive(arg){
+			if(arg > 0){
+				return true;
+			} 
+			else {
+				return false;
+			}
+		}
+
+		function thirdAngle(theta){
+			var thirdAngle = 180 - (90 + Math.abs(theta));
+			return thirdAngle;
+		}
+
+		function slope(theta){
+			var thirdAngleInDegrees = thirdAngle(theta);
+			var heightY = (-30*Math.sin(theta*Math.PI/180))/Math.sin(90*Math.PI/180); 
+			var widthX = (-30*Math.sin(thirdAngleInDegrees*Math.PI/180))/Math.sin(90*Math.PI/180);
+			var slope = heightY/widthX;
+			if(isPositive(slope)){
+				slope = -1*slope;
+			}
+			return slope;
 		}
 
 		function stopInterval(){
@@ -96,21 +106,6 @@
 			ctx.restore();
 		}
 
-		//setShotAngle for the trajectory of ball through gameplay
-		function setShotAngle(){
-			ctx.clearRect(0,0, width, height);
-			startVector(gunAngle);
-			if(rightPressed && gunAngle < 90){
-				gunAngle += 2;
-			}
-			if(leftPressed && gunAngle > -90){
-				gunAngle -= 2;
-			}
-			if(shotFired){
-				//TODO add instruction here;
-			}
-		}		
-
 		function drawBall(){
 			ctx.beginPath();
 			ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
@@ -125,7 +120,7 @@
 			drawBall();
 			
 			x += dx;
-			y += dy;
+		
 
 			if(x + dx > width-ballRadius || x + dx < ballRadius){
 				dx = -dx;
@@ -144,19 +139,27 @@
 			ctx.clearRect(0, 0, width, height);
 			startVector(gunAngle);
 			
-			if(rightPressed && gunAngle < 90){
+			if(rightPressed && gunAngle < 80){
 				gunAngle += 2;
 			}
-			if(leftPressed && gunAngle > -90){
+			if(leftPressed && gunAngle > -80){
 				gunAngle -= 2;
 			}	
 			if(shotFired){
-				clearInterval(drawGameplay);
-				setInterval(drawBallInMotion, 10);
+				clearInterval(gamePlay);
+				if(isPositive(gunAngle)){
+					gunAngle = 90 - gunAngle;
+				}
+				else{
+					gunAngle = -90 - gunAngle;
+				}
+				angleArray.push(gunAngle);
+				slope = slope(gunAngle);
+				slopeArray.push(slope);
+				console.log(slopeArray);
 			}
 		}
-		
-		var drawGameplay = setInterval(draw, 10);
+		var gamePlay = setInterval(draw, 10);
 	</script>
 </body>
 </html>
