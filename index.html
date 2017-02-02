@@ -19,15 +19,13 @@
 		var startY = height/2;
 		var x = width/2;
 		var y = height-15;
-		var dx = 1;
-		var dy;  
 		var rightPressed = false;
 		var leftPressed = false;
 		var shotFired = false; 
 		var ballRadius = 5;
 		var gunAngle = 0; 
-		var slopeArray = [];
-		var angleArray = [];
+		var slopeObject = {};
+		var angleObject = {};
 
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
@@ -62,8 +60,11 @@
 			if(arg > 0){
 				return true;
 			} 
-			else {
-				return false;
+		}
+
+		function isNegative(arg){
+			if(arg < 0){
+				return true;
 			}
 		}
 
@@ -73,9 +74,19 @@
 		}
 
 		function slope(theta){
+			theta = Math.abs(theta);
+			
+			//third angle of triangle
 			var thirdAngleInDegrees = thirdAngle(theta);
-			var heightY = (-30*Math.sin(theta*Math.PI/180))/Math.sin(90*Math.PI/180); 
-			var widthX = (-30*Math.sin(thirdAngleInDegrees*Math.PI/180))/Math.sin(90*Math.PI/180);
+			
+			//finding the x and y sides via the sin rule. 
+			var heightY = (30*Math.sin(theta*Math.PI/180))/Math.sin(90*Math.PI/180); 
+			var widthX = (30*Math.sin(thirdAngleInDegrees*Math.PI/180))/Math.sin(90*Math.PI/180);
+			
+			//rise/run 
+			/*since the ball will always start going decreasing in y 
+			due to the starting position, we always have to make sure 
+			that the y (slope) is always negative.*/
 			var slope = heightY/widthX;
 			if(isPositive(slope)){
 				slope = -1*slope;
@@ -114,24 +125,23 @@
 			ctx.closePath();
 		}
 
+		//clean up code
 		function drawBallInMotion(){
 			ctx.clearRect(0, 0, width, height);	
-			//TODO add instruction here;
 			drawBall();
-			
-			x += dx;
-		
+			x += slopeObject["slopeX"];
+			y += slopeObject["slopeY"];			
 
-			if(x + dx > width-ballRadius || x + dx < ballRadius){
-				dx = -dx;
+			if(x + slopeObject["slopeX"] > width-ballRadius || x + slopeObject["slopeX"] < ballRadius){
+				slopeObject["slopeX"] = -slopeObject["slopeX"];
 			}
-			
-			if(y + dy < ballRadius){
-				dy = -dy;
-			} else if(y + dy > height+ballRadius){	
+
+			if(y + slopeObject["slopeY"] < ballRadius){
+				slopeObject["slopeY"] = -slopeObject["slopeY"];
+			} else if(y + slopeObject["slopeY"] > height+ballRadius){	
 					stopInterval();
 					document.location.reload();
-			}	
+			}			
 		}
 
 		function draw(){
@@ -139,24 +149,38 @@
 			ctx.clearRect(0, 0, width, height);
 			startVector(gunAngle);
 			
-			if(rightPressed && gunAngle < 80){
+			if(rightPressed && gunAngle < 46){
 				gunAngle += 2;
 			}
-			if(leftPressed && gunAngle > -80){
+			
+			if(leftPressed && gunAngle > -46){
 				gunAngle -= 2;
 			}	
+			
 			if(shotFired){
 				clearInterval(gamePlay);
-				if(isPositive(gunAngle)){
+				if(gunAngle === 0){
+					slopeObject["slopeX"] = 0;
+					slopeObject["slopeY"] = -2;
+					var shotBall = setInterval(drawBallInMotion, 10);
+				}
+				//put the following steps in a function when possible
+				else if(isPositive(gunAngle)){
 					gunAngle = 90 - gunAngle;
+					slopeObject["slopeX"] = 1
+					angleObject["angle"] = (gunAngle);
+					slope = slope(gunAngle);
+					slopeObject["slopeY"] = (slope);
+					var shotBall = setInterval(drawBallInMotion, 10);
 				}
 				else{
 					gunAngle = -90 - gunAngle;
+					slopeObject["slopeX"] = -1
+					angleObject["angle"] = (gunAngle);
+					slope = slope(gunAngle);
+					slopeObject["slopeY"] = (slope);
+					var shotBall = setInterval(drawBallInMotion, 10);
 				}
-				angleArray.push(gunAngle);
-				slope = slope(gunAngle);
-				slopeArray.push(slope);
-				console.log(slopeArray);
 			}
 		}
 		var gamePlay = setInterval(draw, 10);
