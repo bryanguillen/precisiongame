@@ -22,10 +22,13 @@
 		var rightPressed = false;
 		var leftPressed = false;
 		var shotFired = false; 
+		var enterGame = false;
 		var ballRadius = 5;
 		var gunAngle = 0; 
 		var slopeObject = {};
 		var angleObject = {};
+		//var shotBall;
+		//var gamePlay;
 
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
@@ -33,20 +36,30 @@
 		function keydownHandler(e){
 			if(e.keyCode == 39){
 				rightPressed = true;
-			}else if(e.keyCode == 37){
+			}
+			else if(e.keyCode == 37){
 				leftPressed = true;
-			}else if(e.keyCode == 32){
+			}
+			else if(e.keyCode == 32){
 				shotFired = true;
+			}
+			else if(e.keyCode == 13){
+				enterGame = true;
 			}
 		}
 
 		function keyupHandler(e){
 			if(e.keyCode == 39){
 				rightPressed = false;
-			}else if(e.keyCode == 37){
+			}
+			else if(e.keyCode == 37){
 				leftPressed = false;
-			}else if(e.keyCode == 32){
+			}
+			else if(e.keyCode == 32){
 				shotFired = false;
+			}
+			else if(e.keyCode == 13){
+				enterGame = false;
 			}
 		}
 		
@@ -94,10 +107,6 @@
 			return slope;
 		}
 
-		function stopInterval(){
-			clearInterval(drawBallInMotion);
-		}
-
 		//startVector allows the user to see trajectory before shot
 		function startVector(angle){
 			ctx.clearRect(0, 0, width, height);
@@ -118,6 +127,7 @@
 		}
 
 		function drawBall(){
+			//ctx.save();
 			ctx.beginPath();
 			ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
 			ctx.fillStyle = "black";
@@ -125,7 +135,7 @@
 			ctx.closePath();
 		}
 
-		//clean up code
+		//clean up code && find out how to an infite amount of shots
 		function drawBallInMotion(){
 			ctx.clearRect(0, 0, width, height);	
 			drawBall();
@@ -138,15 +148,22 @@
 
 			if(y + slopeObject["slopeY"] < ballRadius){
 				slopeObject["slopeY"] = -slopeObject["slopeY"];
-			} else if(y + slopeObject["slopeY"] > height+ballRadius){	
-					stopInterval();
-					document.location.reload();
+			} else if(y + slopeObject["slopeY"] > height+ballRadius){
+				//TODO BREAK LOOP AND RE ENTER THE LOOP OF GAME PLAY
+				clearInterval(shotBall);
+				//shotSlope = 0;
+				gunAngle = 0;
+				x = width/2; 
+				y = height-15;
+				gamePlay = setInterval(draw, 10);
 			}			
 		}
 
 		function draw(){
 			//for not leaving a trail behind after every frame
 			ctx.clearRect(0, 0, width, height);
+			// this start vector might the source of bug
+			//why because the startvector switches positions
 			startVector(gunAngle);
 			
 			if(rightPressed && gunAngle < 46){
@@ -162,27 +179,27 @@
 				if(gunAngle === 0){
 					slopeObject["slopeX"] = 0;
 					slopeObject["slopeY"] = -2;
-					var shotBall = setInterval(drawBallInMotion, 10);
+					shotBall = setInterval(drawBallInMotion, 10);
 				}
 				//put the following steps in a function when possible
 				else if(isPositive(gunAngle)){
 					gunAngle = 90 - gunAngle;
-					slopeObject["slopeX"] = 1
-					angleObject["angle"] = (gunAngle);
-					slope = slope(gunAngle);
-					slopeObject["slopeY"] = (slope);
-					var shotBall = setInterval(drawBallInMotion, 10);
+					slopeObject["slopeX"] = 1;
+					shotSlope = slope(gunAngle);
+					slopeObject["slopeY"] = shotSlope;
+					shotBall = setInterval(drawBallInMotion, 10);
 				}
 				else{
 					gunAngle = -90 - gunAngle;
-					slopeObject["slopeX"] = -1
-					angleObject["angle"] = (gunAngle);
-					slope = slope(gunAngle);
-					slopeObject["slopeY"] = (slope);
-					var shotBall = setInterval(drawBallInMotion, 10);
+					slopeObject["slopeX"] = -1;
+					shotSlope = slope(gunAngle);
+					slopeObject["slopeY"] = shotSlope;
+					shotBall = setInterval(drawBallInMotion, 10);
 				}
 			}
 		}
+		
+		//start game
 		var gamePlay = setInterval(draw, 10);
 	</script>
 </body>
