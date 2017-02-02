@@ -25,8 +25,8 @@
 		var x = width/2;
 		var y = height-5;
 		//change in x & y for change in frames while in gameplay
-		var dx;
-		var dy; 
+		var dx = 1;
+		var dy = -2; 
 		//event triggers 
 		var rightPressed = false;
 		var leftPressed = false;
@@ -34,7 +34,8 @@
 		//variables for gameplay and shapes 
 		var ballRadius = 5;
 		var gunAngle = 0;
-		//saving the gunangles 
+		//saving the gunAngles 
+		var deltaYArray = [];
 		var angleArray = [];
 
 		document.addEventListener("keydown", keydownHandler, false);
@@ -66,10 +67,14 @@
 		this shoud be the y/x that will give the line! However, take
 		note this floors to the nearest whole number, so it will not 
 		be optimal at first.*/
-		function rise(theta){
-			var degree = angleArray[-1];
-			var radian = degree*Math.PI/180;
-			return Math.floor(Math.tan(radian));
+		function deltaY(theta){
+			var radianAngle = theta*Math.PI/180;
+			var deltaY = Math.floor(Math.tan(radianAngle));
+			return deltaY;
+		}
+
+		function stopInterval(){
+			clearInterval(drawBallInMotion);
 		}
 
 		//startVector allows the user to see trajectory before shot
@@ -102,14 +107,7 @@
 				gunAngle -= 2;
 			}
 			if(shotFired){
-				//stop the loop to collect the angle
-				clearInterval(angleLoop);
-				//add angle for later reference
-				/* figure out what do with angle now
-				and how this number might relate the trajectory of a 
-				ball!*/
-				angleArray.push(gunAngle);
-				setInterval(ballInMotion, 10);
+				//TODO add instruction here;
 			}
 		}		
 
@@ -121,23 +119,44 @@
 			ctx.closePath();
 		}
 
-		function ballInMotion(){
-			//for not leaving a trail behind after every frame
-			ctx.clearRect(0, 0, width, height);
+		function drawBallInMotion(){
+			ctx.clearRect(0, 0, width, height);	
+			//TODO add instruction here;
 			drawBall();
-			x += dx
+			
+			x += dx;
 			y += dy;
+
 			if(x + dx > width-ballRadius || x + dx < ballRadius){
 				dx = -dx;
 			}
+			
 			if(y + dy < ballRadius){
 				dy = -dy;
-			} else if(y + dy > height+ballRadius){
-				document.location.reload();
+			} else if(y + dy > height+ballRadius){	
+					stopInterval();
+					document.location.reload();
+			}	
+		}
+
+		function draw(){
+			//for not leaving a trail behind after every frame
+			ctx.clearRect(0, 0, width, height);
+			startVector(gunAngle);
+			
+			if(rightPressed && gunAngle < 90){
+				gunAngle += 2;
+			}
+			if(leftPressed && gunAngle > -90){
+				gunAngle -= 2;
+			}	
+			if(shotFired){
+				clearInterval(drawGameplay);
+				setInterval(drawBallInMotion, 10);
 			}
 		}
 		
-		var angleLoop=setInterval(setShotAngle, 10);
+		var drawGameplay = setInterval(draw, 10);
 	</script>
 </body>
 </html>
