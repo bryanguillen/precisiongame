@@ -27,7 +27,37 @@
 		var gunAngle = 0; 
 		var slopeObject = {};
 		var angleObject = {};
+		var intervalCount = 3;
 
+		/******** for the collision balls!.. next what you want to do is collision detection, then deletion!*/
+		var innerBalls = []
+		for(i = 0; i<3; i++){
+			innerBalls[i] = {x: 229, y: 154};
+		}
+
+		//this does convert the x and y coordinates!
+		function innerBallsConversion(){
+			for(i=0; i<innerBalls.length; i++){
+				if(i>0){
+					innerBalls[i].x = innerBalls[i-1].x+21;
+					innerBalls[i].y = innerBalls[i-1].y+21;
+				}
+			}
+		}
+
+		function drawInnerBalls(){
+			innerBallsConversion();
+			for(i=0; i<innerBalls.length; i++){
+				ctx.beginPath();
+				ctx.arc(innerBalls[i].x, innerBalls[i].y, ballRadius, 0, Math.PI*2, false);
+				ctx.fillStyle = "red";
+				ctx.fill();
+				ctx.closePath();	
+			}
+		}
+
+		/*****************************************************************************************/
+		
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
 
@@ -142,7 +172,7 @@
 			ctx.restore();
 		}
 
-		function drawBall(){
+		function drawShotBall(){
 			//ctx.save();
 			ctx.beginPath();
 			ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
@@ -155,7 +185,8 @@
 			ctx.clearRect(0, 0, width, height);	
 			dx = slopeObject["slopeX"];
 			dy = slopeObject["slopeY"];
-			drawBall();
+			drawShotBall();
+			drawInnerBalls();
 			x += dx;
 			y += dy;			
 
@@ -168,24 +199,29 @@
 				slopeObject["slopeY"] = -slopeObject["slopeY"];
 			} 
 			else if(y + dy > height+ballRadius){
+				//decrament intervalCount right below
 				clearInterval(shotBall);
+				
 				/*reset method*/
-				resetGameplay();
+				/*if(intervalCount === 0){
+					document.location.reload();
+				}
+				else{	
+					resetGameplay();
+				}*/
 			}			
 		}
 
 		function draw(){
-			//for not leaving a trail behind after every frame
 			ctx.clearRect(0, 0, width, height);
-			// this start vector might the source of bug
-			//why because the startvector switches positions
 			startVector(gunAngle);
-			
-			if(rightPressed && gunAngle < 46){
+			drawInnerBalls();
+
+			if(rightPressed && gunAngle < 61){
 				gunAngle += 2;
 			}
 			
-			if(leftPressed && gunAngle > -46){
+			if(leftPressed && gunAngle > -61){
 				gunAngle -= 2;
 			}	
 			
