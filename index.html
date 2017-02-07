@@ -34,7 +34,7 @@
 		*/
 		var innerBalls = []
 		for(i = 0; i<3; i++){
-			innerBalls[i] = {x: 229, y: 154};
+			innerBalls[i] = {x: 229, y: 154, status: 1};
 		}
 
 		//this does convert the x and y coordinates for objects in innerBalls list. 
@@ -50,11 +50,13 @@
 		function drawInnerBalls(){
 			innerBallsConversion();
 			for(i=0; i<innerBalls.length; i++){
-				ctx.beginPath();
-				ctx.arc(innerBalls[i].x, innerBalls[i].y, ballRadius, 0, Math.PI*2, false);
-				ctx.fillStyle = "red";
-				ctx.fill();
-				ctx.closePath();	
+				if(innerBalls[i].status === 1){
+					ctx.beginPath();
+					ctx.arc(innerBalls[i].x, innerBalls[i].y, ballRadius, 0, Math.PI*2, false);
+					ctx.fillStyle = "red";
+					ctx.fill();
+					ctx.closePath();	
+				}
 			}
 		}
 
@@ -62,15 +64,62 @@
 		above functions. !**/
 		function innerCollisionDetection(){
 			for(i=0; i<innerBalls.length; i++){ 
-				if(x > innerBalls[i].x && x < innerBalls[i].x+ballRadius && y > innerBalls[i].y && y < innerBalls[i].y+ballRadius || 
-					x === 250 && y === 175){
-					slopeObject["slopeY"] = -slopeObject["slopeY"]
+				
+					if(x > innerBalls[i].x && x < innerBalls[i].x+ballRadius && y > innerBalls[i].y && y < innerBalls[i].y+ballRadius && 
+						innerBalls[i].status === 1){
+						slopeObject["slopeY"] = -slopeObject["slopeY"];
+						innerBalls[i].status = 0;
 					}
-				}
+				
+					if(x === 250 && y === 175 && innerBalls[1].status === 1){
+						slopeObject["slopeY"] = -slopeObject["slopeY"];
+						innerBalls[1].status = 0;
+					}	
 			}
+		}
 
 		/*****************************************************************************************/
-		
+
+		/**** right vertical *****/
+
+		var rightVertical = []
+		for(i = 0; i<4; i++){
+			rightVertical[i] = {x: 350, y: 125, status: 1};
+		}		
+
+		function rightVerticalConversion(){
+			for(i=0; i<rightVertical.length; i++){
+				if(i>0){
+					rightVertical[i].y = rightVertical[i-1].y+35;
+				}
+			}
+		}
+
+		function drawRightVertical(){
+			rightVerticalConversion();
+			for(i=0; i<rightVertical.length; i++){
+				if(rightVertical[i].status === 1){
+					ctx.beginPath();
+					ctx.arc(rightVertical[i].x, rightVertical[i].y, ballRadius, 0, Math.PI*2, false);
+					ctx.fillStyle = "blue";
+					ctx.fill();
+					ctx.closePath();	
+				}
+			}
+		}
+
+		function rightVerticalCollision(){
+			for(i=0; i<rightVertical.length; i++){ 
+				if(x > rightVertical[i].x && x < rightVertical[i].x+ballRadius && y > rightVertical[i].y && y < rightVertical[i].y+ballRadius && 
+					rightVertical[i].status === 1){
+					slopeObject["slopeY"] = -slopeObject["slopeY"];
+					rightVertical[i].status = 0;
+				}		
+			}
+		}
+
+		/****************************************************************************************/		
+
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
 
@@ -123,8 +172,8 @@
 			
 			//rise/run 
 			/*since the ball will always start going decreasing in y 
-			due to the starting position, always have to make sure 
-			that the y (slope) is negative.*/
+			due to the starting position, y is always negative 
+			unless collision detection.*/
 			var slope = heightY/widthX;
 			if(slope > 0){
 				slope = -1*slope;
@@ -138,8 +187,7 @@
 			y = height-15;
 			gamePlay = setInterval(draw, 10);
 		}
-
-		//keep an eye on this and gameplay above.. 
+ 
 		//shootGun was under shot fired in draw
 		function shootGun(rightAngle, gunAngle, xSlope){
 			gunAngle = rightAngle - gunAngle;
@@ -169,7 +217,6 @@
 		}
 
 		function drawShotBall(){
-			//ctx.save();
 			ctx.beginPath();
 			ctx.arc(x, y, ballRadius, 0, Math.PI*2, false);
 			ctx.fillStyle = "black";
@@ -179,17 +226,18 @@
 
 		function drawBallInMotion(){
 			ctx.clearRect(0, 0, width, height);	
-			dx = slopeObject["slopeX"];
-			dy = slopeObject["slopeY"];
+			var dx = slopeObject["slopeX"];
+			var dy = slopeObject["slopeY"];
 			drawShotBall();
 			drawInnerBalls();
+			drawRightVertical();
 			x += dx;
 			y += dy;			
 			
 			//detect collision amongst inner balls!
 			innerCollisionDetection();
-
-			//dx = -dx bug
+			rightVerticalCollision();
+			
 			if(x+dx > width-ballRadius || x+dx < ballRadius){
 				slopeObject["slopeX"] = -slopeObject["slopeX"];
 			}
@@ -215,13 +263,13 @@
 			ctx.clearRect(0, 0, width, height);
 			startVector(gunAngle);
 			drawInnerBalls();
-
+			drawRightVertical();
 			if(rightPressed && gunAngle < 61){
-				gunAngle += 2;
+				gunAngle += 1;
 			}
 			
 			if(leftPressed && gunAngle > -61){
-				gunAngle -= 2;
+				gunAngle -= 1;
 			}	
 			
 			if(shotFired){
@@ -230,8 +278,7 @@
 					slopeObject["slopeX"] = 0;
 					slopeObject["slopeY"] = -2;
 					shotBall = setInterval(drawBallInMotion, 10);
-				}
-				//took away pointless functions keep an eye on it. 
+				} 
 				else if(gunAngle > 0){
 					shootGun(90, gunAngle, 1);
 				}
