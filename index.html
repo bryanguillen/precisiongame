@@ -29,13 +29,15 @@
 		var angleObject = {};
 		var intervalCount = 3;
 
-		/******** for the collision balls!.. next what you want to do is collision detection, then deletion!*/
+		/*** 
+		below, up until next multi line comment, is where collision detection for the game lies.
+		*/
 		var innerBalls = []
 		for(i = 0; i<3; i++){
 			innerBalls[i] = {x: 229, y: 154};
 		}
 
-		//this does convert the x and y coordinates!
+		//this does convert the x and y coordinates for objects in innerBalls list. 
 		function innerBallsConversion(){
 			for(i=0; i<innerBalls.length; i++){
 				if(i>0){
@@ -55,6 +57,17 @@
 				ctx.closePath();	
 			}
 		}
+
+		/**collision detection for the 
+		above functions. !**/
+		function innerCollisionDetection(){
+			for(i=0; i<innerBalls.length; i++){ 
+				if(x > innerBalls[i].x && x < innerBalls[i].x+ballRadius && y > innerBalls[i].y && y < innerBalls[i].y+ballRadius || 
+					x === 250 && y === 175){
+					slopeObject["slopeY"] = -slopeObject["slopeY"]
+					}
+				}
+			}
 
 		/*****************************************************************************************/
 		
@@ -91,30 +104,13 @@
 			}
 		}
 		
-		//generic functions for accomplishing certain tasks
-		
-		function isPositive(arg){
-			if(arg > 0){
-				return true;
-			} 
-		}
-
-		function isNegative(arg){
-			if(arg < 0){
-				return true;
-			}
-		}
-
 		function thirdAngle(theta){
 			var thirdAngle = 180 - (90 + Math.abs(theta));
 			return thirdAngle;
 		}
 
 		/*slope - gives the rise for the rise/run which is equal to slope
-		automatically, the run is going to be one for the ratio.Next 
-		this shoud be the y/x that will give the line! However, take
-		note this floors to the nearest whole number, so it will not 
-		be optimal at first.*/
+		of the line that is the trajectory of the ball*/
 		function slope(theta){
 			theta = Math.abs(theta);
 			
@@ -127,10 +123,10 @@
 			
 			//rise/run 
 			/*since the ball will always start going decreasing in y 
-			due to the starting position, we always have to make sure 
+			due to the starting position, always have to make sure 
 			that the y (slope) is negative.*/
 			var slope = heightY/widthX;
-			if(isPositive(slope)){
+			if(slope > 0){
 				slope = -1*slope;
 			}
 			return slope;
@@ -189,26 +185,29 @@
 			drawInnerBalls();
 			x += dx;
 			y += dy;			
+			
+			//detect collision amongst inner balls!
+			innerCollisionDetection();
 
 			//dx = -dx bug
-			if(x + dx > width-ballRadius || x + dx < ballRadius){
+			if(x+dx > width-ballRadius || x+dx < ballRadius){
 				slopeObject["slopeX"] = -slopeObject["slopeX"];
 			}
 
-			if(y + dy < ballRadius){
+			if(y+dy < ballRadius){
 				slopeObject["slopeY"] = -slopeObject["slopeY"];
 			} 
-			else if(y + dy > height+ballRadius){
+			else if(y+dy > height+ballRadius){
 				//decrament intervalCount right below
 				clearInterval(shotBall);
 				
 				/*reset method*/
-				/*if(intervalCount === 0){
+				if(intervalCount === 0){
 					document.location.reload();
 				}
 				else{	
 					resetGameplay();
-				}*/
+				}
 			}			
 		}
 
@@ -232,8 +231,8 @@
 					slopeObject["slopeY"] = -2;
 					shotBall = setInterval(drawBallInMotion, 10);
 				}
-				//put the following steps in a function when possible
-				else if(isPositive(gunAngle)){
+				//took away pointless functions keep an eye on it. 
+				else if(gunAngle > 0){
 					shootGun(90, gunAngle, 1);
 				}
 				else{
