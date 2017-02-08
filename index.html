@@ -80,6 +80,48 @@
 
 		/*****************************************************************************************/
 
+		//below is upper left cornered rectangle 3x2
+		var rectangle = [];
+		for(i=0; i<6; i++){
+			rectangle[i] = {x: 50, y: 50, status: 1};
+		}
+
+		function rectangleConversion(){
+			for(i=0; i<rectangle.length; i++){
+				if(i!==0 && i<3){
+					rectangle[i].y = rectangle[i-1].y+25;
+				}
+				else if(i>2 && i<rectangle.length){
+					rectangle[i].x = 75;
+					if(i>3){
+						rectangle[i].y = rectangle[i-1].y+25;
+					}
+				}
+			}
+		}
+
+		function drawRectangle(){
+			rectangleConversion();
+			for(i=0; i<rectangle.length; i++){
+				if(rectangle[i].status === 1){
+					ctx.beginPath();
+					ctx.arc(rectangle[i].x, rectangle[i].y, ballRadius, 0, Math.PI*2, false);
+					ctx.fillStyle = "green";
+					ctx.fill();
+					ctx.closePath();	
+				}
+			}
+		}
+
+		function rectangleCollision(){
+			for(i=0; i<rectangle.length; i++){ 
+				if(x > rectangle[i].x && x < rectangle[i].x+ballRadius && y > rectangle[i].y && y < rectangle[i].y+ballRadius && rectangle[i].status === 1){
+					slopeObject["slopeY"] = -slopeObject["slopeY"];
+					rectangle[i].status = 0;
+				}		
+			}
+		}
+		/****************************************************************************************/
 		/**** right vertical *****/
 
 		var rightVertical = []
@@ -110,8 +152,7 @@
 
 		function rightVerticalCollision(){
 			for(i=0; i<rightVertical.length; i++){ 
-				if(x > rightVertical[i].x && x < rightVertical[i].x+ballRadius && y > rightVertical[i].y && y < rightVertical[i].y+ballRadius && 
-					rightVertical[i].status === 1){
+				if(x > rightVertical[i].x && x < rightVertical[i].x+ballRadius && y > rightVertical[i].y && y < rightVertical[i].y+ballRadius && rightVertical[i].status === 1){
 					slopeObject["slopeY"] = -slopeObject["slopeY"];
 					rightVertical[i].status = 0;
 				}		
@@ -231,12 +272,14 @@
 			drawShotBall();
 			drawInnerBalls();
 			drawRightVertical();
+			drawRectangle();
 			x += dx;
 			y += dy;			
 			
 			//detect collision amongst inner balls!
 			innerCollisionDetection();
 			rightVerticalCollision();
+			rectangleCollision();
 			
 			if(x+dx > width-ballRadius || x+dx < ballRadius){
 				slopeObject["slopeX"] = -slopeObject["slopeX"];
@@ -264,6 +307,10 @@
 			startVector(gunAngle);
 			drawInnerBalls();
 			drawRightVertical();
+			drawRectangle();
+
+					
+			/*******************************************************/
 			if(rightPressed && gunAngle < 61){
 				gunAngle += 1;
 			}
