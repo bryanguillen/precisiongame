@@ -28,7 +28,8 @@
 		var slopeObject = {};
 		var angleObject = {};
 		var intervalCount = 3;
-
+		var lives = 30;
+		var score = 0;
 		/*** 
 		below, up until next multi line comment, is where collision detection for the game lies.
 		*/
@@ -69,11 +70,13 @@
 						innerBalls[i].status === 1){
 						slopeObject["slopeY"] = -slopeObject["slopeY"];
 						innerBalls[i].status = 0;
+						score += 10
 					}
 				
 					if(x === 250 && y === 175 && innerBalls[1].status === 1){
 						slopeObject["slopeY"] = -slopeObject["slopeY"];
 						innerBalls[1].status = 0;
+						score += 10
 					}	
 			}
 		}
@@ -269,6 +272,14 @@
 			ctx.clearRect(0, 0, width, height);	
 			var dx = slopeObject["slopeX"];
 			var dy = slopeObject["slopeY"];
+			/*******************************************************/
+			//draw lives right here 
+			ctx.font="20px Georgia";
+			ctx.fillText("Lives: "+lives,375,50);
+
+			ctx.font="20px Georgia";
+			ctx.fillText("Score: "+score,375,75);
+			/******************************************************/
 			drawShotBall();
 			drawInnerBalls();
 			drawRightVertical();
@@ -311,6 +322,13 @@
 
 					
 			/*******************************************************/
+			//draw lives right here 
+			ctx.font="20px Georgia";
+			ctx.fillText("Lives: "+lives,375,50);
+
+			ctx.font="20px Georgia";
+			ctx.fillText("Score: "+score,375,75);
+			/******************************************************/
 			if(rightPressed && gunAngle < 61){
 				gunAngle += 1;
 			}
@@ -320,6 +338,7 @@
 			}	
 			
 			if(shotFired){
+				lives -= 1;
 				clearInterval(gamePlay);
 				if(gunAngle === 0){
 					slopeObject["slopeX"] = 0;
