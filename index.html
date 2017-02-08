@@ -4,25 +4,38 @@
 	<meta charset="utf-8" />
     <title>Precision Video Game</title>
     <style>
-    	* { padding: 0; margin: 0; }
-    	canvas { background: #eee; display: block; margin: 0 auto; }
+    	* { padding: 0; margin: 0; text-align: center;}
+    	canvas{ background: #eee; display: block; margin: 0 auto; }
+    	div{ display: block; margin: 0 auto; }
     </style>
 </head>
 <body>
-	<canvas id="myCanvas" width="500" height="350" style="border: 1px solid red;"></canvas>
+	<main>
+		<canvas id="myCanvas" width="500" height="350" style="border: 1px solid red;"></canvas>
+	</main>
+
+	<footer>
+		<div style="width: 50%; margin-top: 50px;">
+			<p>Hit all 13 balls precisely, (130 score) before you run out of lives.</p>
+			<p>shoot: space, right: <strong>--></strong>, left: <strong><--</strong>, R: restart</p>
+		</div>
+	</footer>
+
 	<script>
 		var canvas = document.getElementById("myCanvas");
 		var ctx = canvas.getContext("2d");
 		var width = canvas.width;
 		var height = canvas.height;
+		//start variables are for the gun
 		var startX = width/2;
 		var startY = height/2;
+		//for the ball when shot
 		var x = width/2;
 		var y = height-15;
 		var rightPressed = false;
 		var leftPressed = false;
 		var shotFired = false; 
-		var enterGame = false;
+		var refreshGame = false;
 		var ballRadius = 5;
 		var gunAngle = 0; 
 		var slopeObject = {};
@@ -30,15 +43,53 @@
 		var intervalCount = 3;
 		var lives = 30;
 		var score = 0;
-		/*** 
-		below, up until next multi line comment, is where collision detection for the game lies.
-		*/
+		
+		function collision(list){
+			/***
+			detect collision between shot ball and the obstacles in the game
+			****/
+			if((x>list[i].x && x<list[i].x+ballRadius) && (y>list[i].y && y<list[i].y+ballRadius) && list[i].status === 1){
+				slopeObject["slopeY"] = -slopeObject["slopeY"];
+				list[i].status = 0;
+				score += 10;
+			}
+		}
+
+		function drawObstacles(list, color){
+			for(i=0; i<list.length; i++){
+				if(list[i].status === 1){
+					ctx.beginPath();
+					ctx.arc(list[i].x, list[i].y, ballRadius, 0, Math.PI*2, false);
+					ctx.fillStyle = color;
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+		}
+
+		function drawStats(){
+			//stats = users' lives && score
+			ctx.font="20px Georgia";
+			ctx.fillText("Lives: "+lives,375,50);
+
+			ctx.font="20px Georgia";
+			ctx.fillText("Score: "+score,375,75);
+		}
+
+		function winner(){
+			if(score === 130){
+				clearInterval(shotBall);
+				document.write("YOU HAVE WON!");
+			}
+		}
+
+		//list holds coordinate objects 
 		var innerBalls = []
 		for(i = 0; i<3; i++){
 			innerBalls[i] = {x: 229, y: 154, status: 1};
 		}
 
-		//this does convert the x and y coordinates for objects in innerBalls list. 
+		//convert x & y coordinates in innerBalls list of objects 
 		function innerBallsConversion(){
 			for(i=0; i<innerBalls.length; i++){
 				if(i>0){
@@ -50,38 +101,21 @@
 
 		function drawInnerBalls(){
 			innerBallsConversion();
-			for(i=0; i<innerBalls.length; i++){
-				if(innerBalls[i].status === 1){
-					ctx.beginPath();
-					ctx.arc(innerBalls[i].x, innerBalls[i].y, ballRadius, 0, Math.PI*2, false);
-					ctx.fillStyle = "red";
-					ctx.fill();
-					ctx.closePath();	
-				}
-			}
+			drawObstacles(innerBalls, "red");
 		}
 
-		/**collision detection for the 
-		above functions. !**/
 		function innerCollisionDetection(){
 			for(i=0; i<innerBalls.length; i++){ 
-				
-					if(x > innerBalls[i].x && x < innerBalls[i].x+ballRadius && y > innerBalls[i].y && y < innerBalls[i].y+ballRadius && 
-						innerBalls[i].status === 1){
-						slopeObject["slopeY"] = -slopeObject["slopeY"];
-						innerBalls[i].status = 0;
-						score += 10
-					}
-				
-					if(x === 250 && y === 175 && innerBalls[1].status === 1){
-						slopeObject["slopeY"] = -slopeObject["slopeY"];
-						innerBalls[1].status = 0;
-						score += 10
-					}	
+				//special case, if shot from initializing position.
+				if(x === 250 && y === 175 && innerBalls[1].status === 1){
+					slopeObject["slopeY"] = -slopeObject["slopeY"];
+					innerBalls[1].status = 0;
+					score += 10
+				}
+					
+				collision(innerBalls);
 			}
 		}
-
-		/*****************************************************************************************/
 
 		//below is upper left cornered rectangle 3x2
 		var rectangle = [];
@@ -105,28 +139,16 @@
 
 		function drawRectangle(){
 			rectangleConversion();
-			for(i=0; i<rectangle.length; i++){
-				if(rectangle[i].status === 1){
-					ctx.beginPath();
-					ctx.arc(rectangle[i].x, rectangle[i].y, ballRadius, 0, Math.PI*2, false);
-					ctx.fillStyle = "green";
-					ctx.fill();
-					ctx.closePath();	
-				}
-			}
+			drawObstacles(rectangle, "green");
 		}
 
 		function rectangleCollision(){
 			for(i=0; i<rectangle.length; i++){ 
-				if(x > rectangle[i].x && x < rectangle[i].x+ballRadius && y > rectangle[i].y && y < rectangle[i].y+ballRadius && rectangle[i].status === 1){
-					slopeObject["slopeY"] = -slopeObject["slopeY"];
-					rectangle[i].status = 0;
-				}		
+				collision(rectangle);	
 			}
 		}
-		/****************************************************************************************/
-		/**** right vertical *****/
-
+		
+		//last obstacle of game
 		var rightVertical = []
 		for(i = 0; i<4; i++){
 			rightVertical[i] = {x: 350, y: 125, status: 1};
@@ -142,27 +164,14 @@
 
 		function drawRightVertical(){
 			rightVerticalConversion();
-			for(i=0; i<rightVertical.length; i++){
-				if(rightVertical[i].status === 1){
-					ctx.beginPath();
-					ctx.arc(rightVertical[i].x, rightVertical[i].y, ballRadius, 0, Math.PI*2, false);
-					ctx.fillStyle = "blue";
-					ctx.fill();
-					ctx.closePath();	
-				}
-			}
+			drawObstacles(rightVertical, "blue");
 		}
 
 		function rightVerticalCollision(){
 			for(i=0; i<rightVertical.length; i++){ 
-				if(x > rightVertical[i].x && x < rightVertical[i].x+ballRadius && y > rightVertical[i].y && y < rightVertical[i].y+ballRadius && rightVertical[i].status === 1){
-					slopeObject["slopeY"] = -slopeObject["slopeY"];
-					rightVertical[i].status = 0;
-				}		
+				collision(rightVertical);
 			}
 		}
-
-		/****************************************************************************************/		
 
 		document.addEventListener("keydown", keydownHandler, false);
 		document.addEventListener("keyup", keyupHandler, false);
@@ -177,8 +186,8 @@
 			else if(e.keyCode == 32){
 				shotFired = true;
 			}
-			else if(e.keyCode == 13){
-				enterGame = true;
+			else if(e.keyCode == 82){
+				refreshGame = true;
 			}
 		}
 
@@ -192,8 +201,8 @@
 			else if(e.keyCode == 32){
 				shotFired = false;
 			}
-			else if(e.keyCode == 13){
-				enterGame = false;
+			else if(e.keyCode == 82){
+				refreshGame = false;
 			}
 		}
 		
@@ -202,9 +211,9 @@
 			return thirdAngle;
 		}
 
-		/*slope - gives the rise for the rise/run which is equal to slope
-		of the line that is the trajectory of the ball*/
 		function slope(theta){
+			/*slope - gives the rise for the rise/run, which is equal to slope
+			of the line that is the trajectory of the ball*/
 			theta = Math.abs(theta);
 			
 			//third angle of triangle
@@ -225,6 +234,7 @@
 			return slope;
 		}
 
+		//after ball exceeds y value of 500 on canvas, give another shot
 		function resetGameplay(){
 			gunAngle = 0;
 			x = width/2; 
@@ -272,26 +282,22 @@
 			ctx.clearRect(0, 0, width, height);	
 			var dx = slopeObject["slopeX"];
 			var dy = slopeObject["slopeY"];
-			/*******************************************************/
-			//draw lives right here 
-			ctx.font="20px Georgia";
-			ctx.fillText("Lives: "+lives,375,50);
-
-			ctx.font="20px Georgia";
-			ctx.fillText("Score: "+score,375,75);
-			/******************************************************/
+			winner();
+			drawStats();
 			drawShotBall();
 			drawInnerBalls();
 			drawRightVertical();
 			drawRectangle();
+			
 			x += dx;
 			y += dy;			
 			
-			//detect collision amongst inner balls!
+			//detect collision amongst obstacles!!
 			innerCollisionDetection();
 			rightVerticalCollision();
 			rectangleCollision();
 			
+			//collision up against walls
 			if(x+dx > width-ballRadius || x+dx < ballRadius){
 				slopeObject["slopeX"] = -slopeObject["slopeX"];
 			}
@@ -300,16 +306,9 @@
 				slopeObject["slopeY"] = -slopeObject["slopeY"];
 			} 
 			else if(y+dy > height+ballRadius){
-				//decrament intervalCount right below
 				clearInterval(shotBall);
-				
 				/*reset method*/
-				if(intervalCount === 0){
-					document.location.reload();
-				}
-				else{	
-					resetGameplay();
-				}
+				resetGameplay();
 			}			
 		}
 
@@ -319,16 +318,8 @@
 			drawInnerBalls();
 			drawRightVertical();
 			drawRectangle();
+			drawStats();
 
-					
-			/*******************************************************/
-			//draw lives right here 
-			ctx.font="20px Georgia";
-			ctx.fillText("Lives: "+lives,375,50);
-
-			ctx.font="20px Georgia";
-			ctx.fillText("Score: "+score,375,75);
-			/******************************************************/
 			if(rightPressed && gunAngle < 61){
 				gunAngle += 1;
 			}
@@ -336,9 +327,15 @@
 			if(leftPressed && gunAngle > -61){
 				gunAngle -= 1;
 			}	
-			
+
 			if(shotFired){
-				lives -= 1;
+				if(lives===0){
+					clearInterval(draw);
+					document.location.reload();
+				}
+				else{
+					lives -= 1;
+				}
 				clearInterval(gamePlay);
 				if(gunAngle === 0){
 					slopeObject["slopeX"] = 0;
@@ -352,6 +349,10 @@
 					shootGun(-90, gunAngle, -1);
 				}
 			}
+		
+			if(refreshGame){
+				document.location.reload();
+			}	
 		}
 		
 		//start game
