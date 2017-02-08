@@ -5,7 +5,7 @@ and a bit more tricky with pure javascript, rather than another CRUD application
 the planet, shoot the colored dots and get rid of all those dots before you run out of lives. With this project, learning pure javascript 
 and increasing skill in data manipulation were the goals in mind.
 
-Please do not judge on graphics. =) I am terrible at that. 
+Please do not judge on graphics. =) I am terrible at that. Also, keep in mind that this game can only be played on a desktop or laptop machine.
 
 [Click here](https://bryg217.github.io/precisiongame/ "Precision Shooter") to play. Good luck.
 
