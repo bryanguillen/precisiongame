@@ -9,6 +9,8 @@ Please do not judge on graphics. =) I am terrible at that. Also, keep in mind th
 
 [Click here](https://bryg217.github.io/precisiongame/ "Precision Shooter") to play. Good luck.
 
+Warning!! The collision detection is horrible (ie. graphics) so just adjust whenever it seems like you hit a ball. 
+
 ##Author
 
 Bryan G.
